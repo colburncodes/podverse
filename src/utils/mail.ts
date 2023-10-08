@@ -30,8 +30,6 @@ interface Profile {
 export const sendVerificationEmail = async (user: Profile, token: string) => {
   const transport = generateMailTransporter();
 
-  await emailVerificationToken.create({ owner: user.id, token });
-
   const welcomeMessage = `Hi ${user.name}, welcome to Podverse! There are so much things that we do for verified
     users. Please verify your email by using the OTP token.`;
 
