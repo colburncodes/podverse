@@ -54,6 +54,8 @@ Create a `.env` file in root directory
 
 ```
 MONGODB_URI="mongodb://localhost:27017/<db-name>"
+MAILTRAP_USER=<usertoken>
+MAILTRAP_PASS=<password>
 ```
 
 Start the server
