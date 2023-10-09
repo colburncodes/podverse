@@ -26,9 +26,9 @@ Creating a server for the mobile application of Podverse.
 
 | Endpoint | Methods | Description |
 | -------- | ------- | ----------- |
-| `/create` | `POST` |   Create a new user|
-| `/verify-email` | `POST` |   Verify user's email|
-| `/send-verify-email` | `POST` |   Verification token to validate user|
+| `auth/create` | `POST` |   Create a new user|
+| `auth/verify-email` | `POST` |   Verify user's email|
+| `auth/send-verify-email` | `POST` |   Verification token to validate user|
 
 ## Run Locally
 
