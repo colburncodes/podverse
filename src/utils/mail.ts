@@ -33,7 +33,7 @@ export const sendVerificationEmail = async (user: Profile, token: string) => {
   const welcomeMessage = `Hi ${user.name}, welcome to Podverse! There are so much things that we do for verified
     users. Please verify your email by using the OTP token.`;
 
-  transport.sendMail({
+  await transport.sendMail({
     to: user.email,
     from: VERIFICATION_EMAIL,
     subject: "Welcome to Podverse",
@@ -56,6 +56,47 @@ export const sendVerificationEmail = async (user: Profile, token: string) => {
         filename: "welcome.png",
         path: path.join(__dirname, "../mail/welcome.png"),
         cid: "welcome",
+      },
+    ],
+  });
+};
+
+interface Options {
+  email: string;
+  link: string;
+}
+
+export const sendPasswordLink = async (options: Options) => {
+  const transport = generateMailTransporter();
+
+  const { email, link } = options;
+
+  const message = `Hi ${email}, we received a request that you forgot your password. No problem
+  you can use the link below and create brand new password.`;
+
+  await transport.sendMail({
+    to: email,
+    from: VERIFICATION_EMAIL,
+    subject: "Password Reset Link",
+    html: generateTemplate({
+      title: "Password Reset",
+      message,
+      logo: "cid:logo",
+      banner: "cid:forget_password",
+      link,
+      btnTitle: "Reset Password",
+    }),
+
+    attachments: [
+      {
+        filename: "logo.png",
+        path: path.join(__dirname, "../mail/logo.png"),
+        cid: "logo",
+      },
+      {
+        filename: "forget_password.png",
+        path: path.join(__dirname, "../mail/forget_password.png"),
+        cid: "forget_password",
       },
     ],
   });
