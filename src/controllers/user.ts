@@ -2,9 +2,12 @@ import { RequestHandler } from "express";
 import { CreateUser, VerifyEmailRequest } from "#/@types/user";
 import User from "#/models/user";
 import { generateToken } from "#/utils/helper";
-import { sendVerificationEmail } from "#/utils/mail";
+import {sendPasswordLink, sendVerificationEmail} from "#/utils/mail";
 import emailVerificationToken from "#/models/emailVerificationToken";
 import { isValidObjectId } from "mongoose";
+import PasswordResetToken from "#/models/passwordResetToken";
+import crypto from 'crypto'
+import {PASSWORD_RESET_LINK} from "#/utils/variables";
 
 export const create: RequestHandler = async (req: CreateUser, res) => {
   const { email, password, name } = req.body;
@@ -14,7 +17,7 @@ export const create: RequestHandler = async (req: CreateUser, res) => {
 
   await emailVerificationToken.create({ owner: user._id, token });
 
-  sendVerificationEmail({ name, email, id: user._id.toString() }, token);
+  await sendVerificationEmail({ name, email, id: user._id.toString() }, token);
 
   res.status(201).json({ user: { id: user._id, name, email } });
 };
@@ -52,10 +55,31 @@ export const sendVerificationToken: RequestHandler = async (req, res) => {
   const token = generateToken();
   await emailVerificationToken.create({ owner: userId, token });
 
-  sendVerificationEmail(
+  await sendVerificationEmail(
     { name: user?.name, email: user?.email, id: user?._id.toString() },
     token
   );
 
   res.json({ message: "Please check your email for verification." });
+}
+
+export const generateForgetPasswordLink: RequestHandler = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email: email });
+
+  if(!user) return res.status(404).json({ error: "Account not found!"})
+  await PasswordResetToken.findOneAndDelete({owner: user._id});
+
+  // generate the link
+  const token = crypto.randomBytes(36).toString('hex')
+  await PasswordResetToken.create({
+    owner: user._id,
+    token
+  })
+
+  const resetLink = `${PASSWORD_RESET_LINK}?token=${token}&userId=${user._id}`;
+
+  await sendPasswordLink({ email, link: resetLink})
+  res.json({message: "Check your email."})
 };
